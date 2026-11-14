@@ -1,43 +1,59 @@
 // Órbita TEA · /api/novedades
-// Cloudflare Pages Function: junta novedades sobre autismo de fuentes confiables
-// y las devuelve como JSON. Se cachea 3 horas para no pedirle de más a las fuentes.
-//
+// Junta novedades sobre autismo de fuentes confiables, arma título + copete,
+// traduce al español lo que viene en inglés (Workers AI, binding "AI") y lo devuelve como JSON.
+// El resultado se guarda 3 horas en KV (binding "FEEDBACK") para no recalcular en cada visita.
 // Para agregar o sacar una fuente RSS, editar la lista FEEDS.
 
 const FEEDS = [
-  { fuente: 'The Transmitter', url: 'https://www.thetransmitter.org/feed/', filtro: /autis/i },
-  { fuente: 'ScienceDaily', url: 'https://www.sciencedaily.com/rss/mind_brain/autism.xml' },
-  { fuente: 'Autismo España', url: 'https://autismo.org.es/feed/' },
+  { fuente: 'The Transmitter', url: 'https://www.thetransmitter.org/feed/', lang: 'en', filtro: /autis/i },
+  { fuente: 'ScienceDaily', url: 'https://www.sciencedaily.com/rss/mind_brain/autism.xml', lang: 'en' },
+  { fuente: 'Autismo España', url: 'https://autismo.org.es/feed/', lang: 'es' },
 ];
 
-// Revisiones sistemáticas recientes con "autism" en el título.
+// Revisiones sistemáticas recientes con "autism" en el título (trae el resumen).
 const EUROPE_PMC =
-  'https://www.ebi.ac.uk/europepmc/webservices/rest/search?format=json&pageSize=8&resultType=lite&query=' +
+  'https://www.ebi.ac.uk/europepmc/webservices/rest/search?format=json&pageSize=6&resultType=core&query=' +
   encodeURIComponent('(TITLE:autism OR TITLE:autistic) AND PUB_TYPE:"systematic review" sort_date:y');
 
 const POR_FUENTE = 5;
 const TOTAL = 12;
 const CACHE_SEG = 3 * 60 * 60;
+const COPETE_MAX = 220;
+const MODELO = '@cf/meta/m2m100-1.2b';
 
 function limpiar(s) {
   return (s || '')
     .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
-    .replace(/<[^>]+>/g, '')
+    .replace(/<[^>]+>/g, ' ')
     .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"').replace(/&#0?39;|&apos;/g, "'")
+    .replace(/&quot;/g, '"').replace(/&#0?39;|&apos;/g, "'").replace(/&nbsp;/g, ' ')
+    .replace(/&#8217;/g, '’').replace(/&#8230;|&hellip;/g, '…')
     .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)))
     .replace(/\s+/g, ' ')
     .trim();
 }
 
+function copete(texto) {
+  let t = limpiar(texto).replace(/\s*(The post|Read more|Continue reading).*$/i, '').trim();
+  if (t.length <= COPETE_MAX) return t;
+  const corte = t.slice(0, COPETE_MAX);
+  const punto = Math.max(corte.lastIndexOf('. '), corte.lastIndexOf('? '));
+  return punto > 80 ? corte.slice(0, punto + 1) : corte.replace(/\s+\S*$/, '') + '…';
+}
+
 function campo(bloque, nombre) {
   const m = bloque.match(new RegExp('<' + nombre + '[^>]*>([\\s\\S]*?)</' + nombre + '>', 'i'));
-  return m ? limpiar(m[1]) : '';
+  return m ? m[1] : '';
+}
+
+function fechaISO(s) {
+  const d = new Date(limpiar(s));
+  return isNaN(d) ? '' : d.toISOString();
 }
 
 async function leerRSS(feed) {
   const r = await fetch(feed.url, {
-    headers: { 'User-Agent': 'OrbitaTEA/1.0 (+novedades)', Accept: 'application/rss+xml, application/xml, text/xml' },
+    headers: { 'User-Agent': 'Mozilla/5.0 (compatible; OrbitaTEA/1.0)', Accept: 'application/rss+xml, application/xml, text/xml, */*' },
     cf: { cacheTtl: CACHE_SEG, cacheEverything: true },
   });
   if (!r.ok) throw new Error(feed.fuente + ' ' + r.status);
@@ -45,12 +61,16 @@ async function leerRSS(feed) {
   const items = [];
   for (const m of xml.matchAll(/<item[\s>][\s\S]*?<\/item>/gi)) {
     const b = m[0];
-    const titulo = campo(b, 'title');
-    const url = campo(b, 'link');
-    const fecha = campo(b, 'pubDate') || campo(b, 'dc:date');
+    const titulo = limpiar(campo(b, 'title'));
+    const url = limpiar(campo(b, 'link'));
+    const desc = campo(b, 'description') || campo(b, 'content:encoded');
     if (!titulo || !/^https:\/\//.test(url)) continue;
-    if (feed.filtro && !feed.filtro.test(titulo + ' ' + campo(b, 'description'))) continue;
-    items.push({ titulo, url, fecha: new Date(fecha).toISOString(), fuente: feed.fuente });
+    if (feed.filtro && !feed.filtro.test(titulo + ' ' + desc)) continue;
+    items.push({
+      titulo, copete: copete(desc), url,
+      fecha: fechaISO(campo(b, 'pubDate') || campo(b, 'dc:date')),
+      fuente: feed.fuente, lang: feed.lang,
+    });
     if (items.length >= POR_FUENTE) break;
   }
   return items;
@@ -66,26 +86,72 @@ async function leerEuropePMC() {
     .slice(0, POR_FUENTE)
     .map((x) => ({
       titulo: limpiar(x.title).replace(/\.$/, ''),
+      copete: copete(x.abstractText || ''),
       url: 'https://europepmc.org/article/' + x.source + '/' + x.id,
-      fecha: new Date(x.firstPublicationDate || x.pubYear + '-01-01').toISOString(),
+      fecha: fechaISO(x.firstPublicationDate || (x.pubYear ? x.pubYear + '-01-01' : '')),
       fuente: 'Revisión sistemática · ' + (x.journalTitle || 'Europe PMC'),
+      lang: 'en',
     }));
 }
 
-export async function onRequestGet() {
-  const tareas = [leerEuropePMC(), ...FEEDS.map(leerRSS)];
-  const res = await Promise.allSettled(tareas);
-  const items = [];
+async function sha(texto) {
+  const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(texto));
+  return [...new Uint8Array(b)].slice(0, 10).map((x) => x.toString(16).padStart(2, '0')).join('');
+}
+
+// Traduce un texto en->es; usa KV como caché para no repetir. Si falla, devuelve null.
+async function traducir(texto, env) {
+  if (!texto || !env.AI) return null;
+  const clave = 'tr:' + (await sha(texto));
+  if (env.FEEDBACK) {
+    const guardado = await env.FEEDBACK.get(clave);
+    if (guardado) return guardado;
+  }
+  try {
+    const r = await env.AI.run(MODELO, { text: texto, source_lang: 'english', target_lang: 'spanish' });
+    const t = r && r.translated_text ? String(r.translated_text).trim() : '';
+    if (!t) return null;
+    if (env.FEEDBACK) await env.FEEDBACK.put(clave, t, { expirationTtl: 60 * 60 * 24 * 60 });
+    return t;
+  } catch {
+    return null;
+  }
+}
+
+async function armar(env) {
+  const res = await Promise.allSettled([leerEuropePMC(), ...FEEDS.map(leerRSS)]);
+  let items = [];
   const errores = [];
   for (const r of res) {
     if (r.status === 'fulfilled') items.push(...r.value);
     else errores.push(String(r.reason && r.reason.message ? r.reason.message : r.reason));
   }
   items.sort((a, b) => (a.fecha < b.fecha ? 1 : -1));
-  return new Response(JSON.stringify({ actualizado: new Date().toISOString(), items: items.slice(0, TOTAL), errores }), {
-    headers: {
-      'Content-Type': 'application/json; charset=utf-8',
-      'Cache-Control': 'public, max-age=' + CACHE_SEG,
-    },
+  items = items.slice(0, TOTAL);
+
+  await Promise.all(
+    items.map(async (it) => {
+      if (it.lang === 'es') return;
+      const [t, c] = await Promise.all([traducir(it.titulo, env), traducir(it.copete, env)]);
+      if (t) { it.tituloOriginal = it.titulo; it.titulo = t; it.traducido = true; }
+      if (c) { it.copete = c; it.traducido = true; }
+    })
+  );
+  return { actualizado: new Date().toISOString(), items, errores, traduccion: !!env.AI };
+}
+
+export async function onRequestGet({ env }) {
+  const CLAVE = 'cache:novedades';
+  let data = null;
+  if (env.FEEDBACK) {
+    const g = await env.FEEDBACK.get(CLAVE, 'json');
+    if (g && Date.now() - new Date(g.actualizado).getTime() < CACHE_SEG * 1000 && g.items && g.items.length) data = g;
+  }
+  if (!data) {
+    data = await armar(env);
+    if (env.FEEDBACK && data.items.length) await env.FEEDBACK.put(CLAVE, JSON.stringify(data), { expirationTtl: CACHE_SEG * 4 });
+  }
+  return new Response(JSON.stringify(data), {
+    headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=600' },
   });
 }

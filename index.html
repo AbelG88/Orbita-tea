@@ -97,6 +97,10 @@ nav.menu a:hover{background:var(--line);color:var(--ink)}
 .news-list a:hover{text-decoration:underline}
 .news-meta{font-size:.82rem;color:var(--ink-2);margin-top:6px;display:flex;gap:8px;flex-wrap:wrap}
 .news-meta b{color:var(--teal)}
+.nov{background:#fff;border-bottom:1px solid var(--line);padding:44px 0}
+.news-list p.cop{margin:6px 0 0;color:var(--ink-2);font-size:.95rem}
+.news-list .trad{font-size:.72rem;font-weight:700;background:var(--violet-soft);color:#473c8c;border-radius:999px;padding:2px 8px}
+.mas{margin-top:16px}
 .fuentes{margin-top:22px;font-size:.92rem;color:var(--ink-2)}
 .fuentes a{white-space:nowrap}
 
@@ -176,6 +180,24 @@ footer p+p{margin-top:8px}
       <circle cx="276" cy="142" r="6" fill="#f2b35d"/>
       <g fill="#5b668c"><circle cx="40" cy="60" r="2"/><circle cx="400" cy="300" r="2"/><circle cx="330" cy="40" r="2"/><circle cx="90" cy="310" r="2"/><circle cx="410" cy="190" r="2"/></g>
     </svg>
+  </div>
+</section>
+
+<section id="novedades" class="nov">
+  <div class="wrap">
+    <p class="eyebrow">Novedades</p>
+    <h2>Autismo, pero posta</h2>
+    <p class="lead">Lo último que publican fuentes científicas y organizaciones serias, con el título y un resumen corto en español. Sin curas milagrosas ni titulares para asustar. Se actualiza solo.</p>
+    <ul class="news-list" id="news" aria-live="polite">
+      <li id="news-estado">Cargando novedades…</li>
+    </ul>
+    <div class="mas"><button class="btn line small" id="news-mas" type="button" hidden>Ver más novedades</button></div>
+    <p class="fuentes">Fuentes:
+      <a href="https://europepmc.org/" target="_blank" rel="noopener">Europe PMC</a> (revisiones sistemáticas) ·
+      <a href="https://www.thetransmitter.org/" target="_blank" rel="noopener">The Transmitter</a> ·
+      <a href="https://www.sciencedaily.com/news/mind_brain/autism/" target="_blank" rel="noopener">ScienceDaily</a> ·
+      <a href="https://autismo.org.es/" target="_blank" rel="noopener">Autismo España</a>.
+      Lo que viene en inglés se traduce automáticamente y puede tener errores: el enlace lleva al artículo original. Una noticia no es una indicación médica: cualquier cambio en un tratamiento se habla con el equipo que atiende a tu hijo.</p>
   </div>
 </section>
 
@@ -305,22 +327,7 @@ footer p+p{margin-top:8px}
   </div>
 </section>
 
-<section id="novedades">
-  <div class="wrap">
-    <p class="eyebrow">Novedades</p>
-    <h2>Autismo, pero posta</h2>
-    <p class="lead">Lo último que publican fuentes científicas y organizaciones serias. Sin curas milagrosas ni titulares para asustar. Se actualiza solo.</p>
-    <ul class="news-list" id="news" aria-live="polite">
-      <li id="news-estado">Cargando novedades…</li>
-    </ul>
-    <p class="fuentes">Fuentes:
-      <a href="https://europepmc.org/" target="_blank" rel="noopener">Europe PMC</a> (revisiones sistemáticas) ·
-      <a href="https://www.thetransmitter.org/" target="_blank" rel="noopener">The Transmitter</a> ·
-      <a href="https://www.sciencedaily.com/news/mind_brain/autism/" target="_blank" rel="noopener">ScienceDaily</a> ·
-      <a href="https://autismo.org.es/" target="_blank" rel="noopener">Autismo España</a>.
-      Algunos títulos están en inglés. Una noticia no es una indicación médica: cualquier cambio en un tratamiento se habla con el equipo que atiende a tu hijo.</p>
-  </div>
-</section>
+
 
 <section id="opina" class="opina">
   <div class="wrap">
@@ -414,29 +421,39 @@ footer p+p{margin-top:8px}
     if(isNaN(d)) return '';
     return d.toLocaleDateString('es-AR',{day:'numeric',month:'short',year:'numeric'});
   }
-  function pintar(items){
+  var todos=[], visibles=6, mas=document.getElementById('news-mas');
+  function pintar(){
     lista.textContent='';
-    items.slice(0,10).forEach(function(n){
-      if(!n||!n.titulo||!/^https:\/\//.test(n.url||'')) return;
+    todos.slice(0,visibles).forEach(function(n){
       var li=document.createElement('li'), a=document.createElement('a'), m=document.createElement('div'), b=document.createElement('b');
       a.href=n.url; a.target='_blank'; a.rel='noopener'; a.textContent=n.titulo;
+      li.appendChild(a);
+      if(n.copete){var p=document.createElement('p');p.className='cop';p.textContent=n.copete;li.appendChild(p);}
       m.className='news-meta'; b.textContent=n.fuente||'';
       m.appendChild(b);
       var f=fecha(n.fecha); if(f){var s=document.createElement('span'); s.textContent=f; m.appendChild(s);}
-      li.appendChild(a); li.appendChild(m); lista.appendChild(li);
+      if(n.traducido){var t=document.createElement('span');t.className='trad';t.textContent='Traducido automáticamente';m.appendChild(t);}
+      li.appendChild(m); lista.appendChild(li);
     });
-    if(!lista.children.length) fallo();
+    if(mas) mas.hidden = todos.length<=visibles;
   }
+  function cargar(items){
+    todos=(items||[]).filter(function(n){return n&&n.titulo&&/^https:\/\//.test(n.url||'');});
+    if(!todos.length) return fallo();
+    pintar();
+  }
+  if(mas) mas.addEventListener('click',function(){visibles=todos.length;pintar();});
   function fallo(){
     lista.textContent='';
     var li=document.createElement('li');
-    li.textContent='No se pudieron cargar las novedades en este momento. Podés entrar directo a las fuentes que figuran acá abajo.';
+    li.textContent='No se pudieron cargar las novedades en este momento. Podés entrar directo a las fuentes que figuran abajo.';
+    if(mas) mas.hidden=true;
     lista.appendChild(li);
   }
   fetch('/api/novedades').then(function(r){
     if(!r.ok) throw new Error(r.status);
     return r.json();
-  }).then(function(d){pintar(d.items||[]);}).catch(fallo);
+  }).then(function(d){cargar(d.items);}).catch(fallo);
 })();
 
 (function(){
