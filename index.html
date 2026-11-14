@@ -90,9 +90,15 @@ nav.menu a:hover{background:var(--line);color:var(--ink)}
 .pro{background:#efe9dc}
 
 /* ---------- novedades ---------- */
-.news-list{display:grid;gap:12px;margin-top:26px;list-style:none;padding:0}
-@media (min-width:820px){.news-list{grid-template-columns:repeat(2,1fr)}}
-.news-list li{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.carrusel{position:relative;margin-top:24px}
+.news-list{display:flex;gap:14px;list-style:none;padding:4px 2px 14px;margin:0;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
+.news-list li{flex:0 0 min(86%,330px);scroll-snap-align:start;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;display:flex;flex-direction:column}
+.news-list .news-meta{margin-top:auto;padding-top:10px}
+.news-list a{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.news-list p.cop{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.car-nav{display:flex;gap:8px;margin-top:4px}
+.car-nav button{width:48px;height:48px;border-radius:50%;border:2px solid var(--ink);background:transparent;color:var(--ink);font-size:1.3rem;cursor:pointer;font-family:inherit}
+.car-nav button:disabled{opacity:.3;cursor:default}
 .news-list a{color:var(--ink);font-weight:700;text-decoration:none;display:block}
 .news-list a:hover{text-decoration:underline}
 .news-meta{font-size:.82rem;color:var(--ink-2);margin-top:6px;display:flex;gap:8px;flex-wrap:wrap}
@@ -100,7 +106,6 @@ nav.menu a:hover{background:var(--line);color:var(--ink)}
 .nov{background:#fff;border-bottom:1px solid var(--line);padding:44px 0}
 .news-list p.cop{margin:6px 0 0;color:var(--ink-2);font-size:.95rem}
 .news-list .trad{font-size:.72rem;font-weight:700;background:var(--violet-soft);color:#473c8c;border-radius:999px;padding:2px 8px}
-.mas{margin-top:16px}
 .fuentes{margin-top:22px;font-size:.92rem;color:var(--ink-2)}
 .fuentes a{white-space:nowrap}
 
@@ -187,11 +192,13 @@ footer p+p{margin-top:8px}
   <div class="wrap">
     <p class="eyebrow">Novedades</p>
     <h2>Autismo, pero posta</h2>
-    <p class="lead">Lo último que publican fuentes científicas y organizaciones serias, con el título y un resumen corto en español. Sin curas milagrosas ni titulares para asustar. Se actualiza solo.</p>
-    <ul class="news-list" id="news" aria-live="polite">
+    <p class="lead">Deslizá para ver más. Lo último que publican fuentes científicas y organizaciones serias, con el título y un resumen corto en español. Sin curas milagrosas ni titulares para asustar. Se actualiza solo.</p>
+    <div class="carrusel" role="region" aria-roledescription="carrusel" aria-label="Novedades sobre autismo">
+    <ul class="news-list" id="news" aria-live="polite" tabindex="0">
       <li id="news-estado">Cargando novedades…</li>
     </ul>
-    <div class="mas"><button class="btn line small" id="news-mas" type="button" hidden>Ver más novedades</button></div>
+    <div class="car-nav"><button type="button" id="news-prev" aria-label="Novedades anteriores">‹</button><button type="button" id="news-next" aria-label="Novedades siguientes">›</button></div>
+    </div>
     <p class="fuentes">Fuentes:
       <a href="https://europepmc.org/" target="_blank" rel="noopener">Europe PMC</a> (revisiones sistemáticas) ·
       <a href="https://www.thetransmitter.org/" target="_blank" rel="noopener">The Transmitter</a> ·
@@ -421,10 +428,13 @@ footer p+p{margin-top:8px}
     if(isNaN(d)) return '';
     return d.toLocaleDateString('es-AR',{day:'numeric',month:'short',year:'numeric'});
   }
-  var todos=[], visibles=6, mas=document.getElementById('news-mas');
+  var todos=[], prev=document.getElementById('news-prev'), next=document.getElementById('news-next');
+  function estadoNav(){if(!prev)return;prev.disabled=lista.scrollLeft<4;next.disabled=lista.scrollLeft+lista.clientWidth>=lista.scrollWidth-4;}
+  function mover(d){lista.scrollBy({left:d*Math.max(260,lista.clientWidth*0.8),behavior:'smooth'});}
+  if(prev){prev.addEventListener('click',function(){mover(-1);});next.addEventListener('click',function(){mover(1);});lista.addEventListener('scroll',estadoNav,{passive:true});window.addEventListener('resize',estadoNav);}
   function pintar(){
     lista.textContent='';
-    todos.slice(0,visibles).forEach(function(n){
+    todos.forEach(function(n){
       var li=document.createElement('li'), a=document.createElement('a'), m=document.createElement('div'), b=document.createElement('b');
       a.href=n.url; a.target='_blank'; a.rel='noopener'; a.textContent=n.titulo;
       li.appendChild(a);
@@ -435,19 +445,18 @@ footer p+p{margin-top:8px}
       if(n.traducido){var t=document.createElement('span');t.className='trad';t.textContent='Traducido automáticamente';m.appendChild(t);}
       li.appendChild(m); lista.appendChild(li);
     });
-    if(mas) mas.hidden = todos.length<=visibles;
+    lista.scrollLeft=0;estadoNav();
   }
   function cargar(items){
     todos=(items||[]).filter(function(n){return n&&n.titulo&&/^https:\/\//.test(n.url||'');});
     if(!todos.length) return fallo();
     pintar();
   }
-  if(mas) mas.addEventListener('click',function(){visibles=todos.length;pintar();});
   function fallo(){
     lista.textContent='';
     var li=document.createElement('li');
     li.textContent='No se pudieron cargar las novedades en este momento. Podés entrar directo a las fuentes que figuran abajo.';
-    if(mas) mas.hidden=true;
+    if(prev){prev.hidden=true;next.hidden=true;}
     lista.appendChild(li);
   }
   fetch('/api/novedades').then(function(r){
