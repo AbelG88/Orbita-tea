@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Órbita TEA · Apps hechas por un papá para familias con autismo</title>
+<meta name="description" content="Apps gratuitas y sin publicidad pensadas para el día a día de familias con chicos con autismo (TEA), más novedades de fuentes confiables.">
+<meta name="theme-color" content="#1b2440">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231b2440'/%3E%3Cellipse cx='32' cy='32' rx='24' ry='11' fill='none' stroke='%23f2b35d' stroke-width='3' transform='rotate(-24 32 32)'/%3E%3Ccircle cx='32' cy='32' r='9' fill='%2357c2b6'/%3E%3C/svg%3E">
+<style>
+:root{
+  --ink:#1b2440; --ink-2:#465071; --paper:#f7f2e8; --card:#fffdf8; --line:#e3dccd;
+  --teal:#1f8f86; --teal-soft:#d8efec; --sun:#f2b35d; --sun-soft:#fbeacb;
+  --coral:#d9644a; --coral-soft:#f9e0d9; --violet:#6c5fb5; --violet-soft:#e6e2f6;
+  --radius:18px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:ui-rounded,"SF Pro Rounded","Nunito","Quicksand",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  font-size:17px;line-height:1.55;-webkit-text-size-adjust:100%}
+a{color:var(--teal);text-underline-offset:3px}
+a:focus-visible,button:focus-visible{outline:3px solid var(--sun);outline-offset:3px;border-radius:8px}
+.wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+h1,h2,h3{line-height:1.15;margin:0;letter-spacing:-.01em}
+h2{font-size:clamp(1.6rem,5vw,2.2rem)}
+h3{font-size:1.25rem}
+p{margin:0}
+.eyebrow{font-size:.8rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--teal)}
+.lead{color:var(--ink-2);max-width:60ch;margin-top:10px}
+section{padding:56px 0}
+.skip{position:absolute;left:-999px}
+.skip:focus{left:12px;top:12px;background:#fff;padding:10px 14px;border-radius:10px;z-index:99}
+
+/* ---------- encabezado ---------- */
+header.top{position:sticky;top:0;z-index:20;background:rgba(247,242,232,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:58px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.15rem;color:var(--ink);text-decoration:none}
+.brand svg{width:34px;height:34px;flex:none}
+nav.menu{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+nav.menu::-webkit-scrollbar{display:none}
+nav.menu a{white-space:nowrap;text-decoration:none;color:var(--ink-2);font-weight:600;font-size:.92rem;padding:8px 10px;border-radius:10px}
+nav.menu a:hover{background:var(--line);color:var(--ink)}
+@media (max-width:640px){
+  .top .wrap{flex-direction:column;align-items:flex-start;gap:0;padding-top:8px}
+  nav.menu{width:calc(100% + 20px);margin-left:-10px;padding-bottom:6px}
+}
+
+/* ---------- portada ---------- */
+.hero{background:var(--ink);color:#fff;padding:0;overflow:hidden}
+.hero .wrap{display:grid;gap:24px;align-items:center;padding-top:48px;padding-bottom:48px}
+@media (min-width:820px){.hero .wrap{grid-template-columns:1.1fr .9fr;padding-top:72px;padding-bottom:72px}}
+.hero .eyebrow{color:var(--sun)}
+.hero h1{font-size:clamp(2.1rem,8vw,3.5rem);margin-top:12px}
+.hero h1 em{font-style:normal;color:var(--sun)}
+.hero p.sub{color:#cdd3e6;margin-top:16px;max-width:52ch;font-size:1.08rem}
+.cta{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 20px;border-radius:14px;
+  font-weight:700;font-size:1rem;text-decoration:none;border:2px solid transparent;cursor:pointer;font-family:inherit}
+.btn.primary{background:var(--sun);color:var(--ink)}
+.btn.ghost{border-color:#5b668c;color:#fff}
+.btn.dark{background:var(--ink);color:#fff}
+.btn.line{border-color:var(--ink);color:var(--ink);background:transparent}
+.btn.small{min-height:42px;padding:0 14px;font-size:.93rem}
+.orbit{width:100%;max-width:440px;justify-self:center}
+
+/* ---------- aviso ---------- */
+.aviso{background:var(--sun-soft);border-top:1px solid #ecd29f;border-bottom:1px solid #ecd29f;padding:28px 0}
+.aviso .wrap{display:grid;gap:14px}
+.aviso h2{font-size:1.25rem;display:flex;gap:10px;align-items:center}
+.aviso ul{margin:0;padding-left:20px;display:grid;gap:6px;color:#4a3a14}
+.aviso strong{color:var(--ink)}
+
+/* ---------- apps ---------- */
+.grid{display:grid;gap:16px;margin-top:28px}
+@media (min-width:700px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media (min-width:980px){.grid.tres{grid-template-columns:repeat(3,1fr)}}
+.app{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;display:flex;flex-direction:column;gap:12px}
+.app .head{display:flex;align-items:center;gap:14px}
+.planet{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;font-size:1.7rem;flex:none}
+.p-teal{background:var(--teal-soft)} .p-sun{background:var(--sun-soft)} .p-coral{background:var(--coral-soft)} .p-violet{background:var(--violet-soft)} .p-gris{background:#ebe6da}
+.app .kind{font-size:.8rem;font-weight:700;color:var(--ink-2)}
+.app p.desc{color:var(--ink-2)}
+.app ul{margin:0;padding-left:18px;color:var(--ink-2);font-size:.95rem;display:grid;gap:3px}
+.app .acciones{margin-top:auto;padding-top:8px;display:flex;flex-wrap:wrap;gap:8px}
+.tag{display:inline-block;font-size:.75rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:999px;background:var(--violet-soft);color:#473c8c}
+.app.pronto{border-style:dashed;background:transparent}
+.nota{font-size:.9rem;color:var(--ink-2);margin-top:18px}
+.pro{background:#efe9dc}
+
+/* ---------- novedades ---------- */
+.news-list{display:grid;gap:12px;margin-top:26px;list-style:none;padding:0}
+@media (min-width:820px){.news-list{grid-template-columns:repeat(2,1fr)}}
+.news-list li{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.news-list a{color:var(--ink);font-weight:700;text-decoration:none;display:block}
+.news-list a:hover{text-decoration:underline}
+.news-meta{font-size:.82rem;color:var(--ink-2);margin-top:6px;display:flex;gap:8px;flex-wrap:wrap}
+.news-meta b{color:var(--teal)}
+.fuentes{margin-top:22px;font-size:.92rem;color:var(--ink-2)}
+.fuentes a{white-space:nowrap}
+
+/* ---------- sobre mí y aportes ---------- */
+.sobre{background:var(--ink);color:#fff}
+.sobre .eyebrow{color:var(--sun)}
+.sobre .texto{max-width:66ch;margin-top:18px;display:grid;gap:14px;color:#dfe3f0;font-size:1.05rem}
+.sobre .firma{color:var(--sun);font-weight:800}
+.aportes .caja{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:26px;margin-top:26px;display:grid;gap:18px}
+.aportes h3{font-size:1rem;color:var(--ink-2)}
+.fila{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+footer{border-top:1px solid var(--line);padding:28px 0 40px;font-size:.88rem;color:var(--ink-2)}
+footer p+p{margin-top:8px}
+</style>
+</head>
+<body>
+<a class="skip" href="#apps">Saltar al contenido</a>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#inicio" aria-label="Órbita TEA, inicio">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#1b2440"/><ellipse cx="32" cy="32" rx="24" ry="11" fill="none" stroke="#f2b35d" stroke-width="3" transform="rotate(-24 32 32)"/><circle cx="32" cy="32" r="9" fill="#57c2b6"/></svg>
+      Órbita TEA
+    </a>
+    <nav class="menu" aria-label="Secciones">
+      <a href="#apps">Apps</a>
+      <a href="#pronto">Próximamente</a>
+      <a href="#profesionales">Profesionales</a>
+      <a href="#novedades">Novedades</a>
+      <a href="#sobre">Sobre mí</a>
+      <a href="#aportes">Aportes</a>
+    </nav>
+  </div>
+</header>
+
+<main id="inicio">
+
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <p class="eyebrow">Apps para familias con autismo</p>
+      <h1>Herramientas chicas para <em>el día a día</em> de tu familia.</h1>
+      <p class="sub">Apps gratuitas, sin publicidad y sin cuentas, hechas por un papá para resolver cosas concretas de la crianza de un nene con TEA: qué comemos, dejar los pañales, el tiempo de pantalla.</p>
+      <div class="cta">
+        <a class="btn primary" href="#apps">Ver las apps</a>
+        <a class="btn ghost" href="#novedades">Novedades sobre autismo</a>
+      </div>
+    </div>
+    <svg class="orbit" viewBox="0 0 440 360" role="img" aria-label="Ilustración: un planeta con apps girando a su alrededor">
+      <g fill="none" stroke="#3a4670" stroke-width="2">
+        <ellipse cx="220" cy="180" rx="200" ry="92" transform="rotate(-18 220 180)"/>
+        <ellipse cx="220" cy="180" rx="140" ry="62" transform="rotate(-18 220 180)"/>
+        <ellipse cx="220" cy="180" rx="84" ry="36" stroke="#f2b35d" transform="rotate(-18 220 180)"/>
+      </g>
+      <circle cx="220" cy="180" r="38" fill="#57c2b6"/>
+      <path d="M190 172c14-10 44-12 60 0" stroke="#1f8f86" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <circle cx="52" cy="216" r="20" fill="#f2b35d"/>
+      <circle cx="372" cy="104" r="15" fill="#e98a72"/>
+      <circle cx="318" cy="236" r="12" fill="#a79be0"/>
+      <circle cx="120" cy="118" r="9" fill="#fffdf8"/>
+      <circle cx="276" cy="142" r="6" fill="#f2b35d"/>
+      <g fill="#5b668c"><circle cx="40" cy="60" r="2"/><circle cx="400" cy="300" r="2"/><circle cx="330" cy="40" r="2"/><circle cx="90" cy="310" r="2"/><circle cx="410" cy="190" r="2"/></g>
+    </svg>
+  </div>
+</section>
+
+<aside class="aviso" aria-labelledby="aviso-t">
+  <div class="wrap">
+    <h2 id="aviso-t"><span aria-hidden="true">⚠️</span> Leé esto antes de usar las apps</h2>
+    <ul>
+      <li><strong>Están hechas con <em>vibe coding</em>:</strong> las programo con ayuda de inteligencia artificial. No soy una empresa ni hay un equipo de pruebas detrás.</li>
+      <li><strong>Cambian todo el tiempo.</strong> Pueden aparecer funciones nuevas, cambiar de lugar o fallar de un día para el otro.</li>
+      <li><strong>Hacé copias de seguridad seguido.</strong> Casi todas guardan los datos solo en tu celular: si se rompe, lo cambiás o borrás los datos del navegador, se pierden. Cada app tiene su opción de respaldo.</li>
+      <li><strong>Usalas con precaución.</strong> Son una ayuda para organizarse; no reemplazan a ningún profesional de la salud ni de la educación.</li>
+    </ul>
+  </div>
+</aside>
+
+<section id="apps">
+  <div class="wrap">
+    <p class="eyebrow">Para familias</p>
+    <h2>Apps disponibles</h2>
+    <p class="lead">Todas son gratis. Las que dicen "web" se abren desde el navegador y se pueden instalar en la pantalla de inicio del celular.</p>
+
+    <div class="grid tres">
+      <article class="app">
+        <div class="head">
+          <div class="planet p-sun" aria-hidden="true">🍝</div>
+          <div><h3>Mangiamo</h3><p class="kind">App web · Android y iPhone</p></div>
+        </div>
+        <p class="desc">¿Qué comemos hoy? Planificador de comidas de la semana con lista de compras.</p>
+        <ul>
+          <li>Dietas combinables, incluida una "simple para chicos"</li>
+          <li>Lista de compras con "ya tengo en casa"</li>
+          <li>Funciona sin conexión; datos cifrados en tu celular</li>
+        </ul>
+        <div class="acciones">
+          <a class="btn dark small" href="https://abelg88.github.io/mangiamo/" target="_blank" rel="noopener">Abrir Mangiamo</a>
+        </div>
+      </article>
+
+      <article class="app">
+        <div class="head">
+          <div class="planet p-teal" aria-hidden="true">🚽</div>
+          <div><h3>Nappy</h3><p class="kind">App web · Android y iPhone</p></div>
+        </div>
+        <p class="desc">Acompaña el proceso de dejar los pañales, con registro rápido y recordatorios.</p>
+        <ul>
+          <li>Logros, intentos y accidentes en dos toques</li>
+          <li>Varios chicos y varios cuidadores</li>
+          <li>Informe en PDF para llevar a los profesionales</li>
+        </ul>
+        <div class="acciones">
+          <a class="btn dark small" href="https://abelg88.github.io/Nappy/" target="_blank" rel="noopener">Abrir Nappy</a>
+        </div>
+      </article>
+
+      <article class="app">
+        <div class="head">
+          <div class="planet p-coral" aria-hidden="true">🧠</div>
+          <div><h3>Tranquera</h3><p class="kind">App Android · se instala con APK</p></div>
+        </div>
+        <p class="desc">Tiempo de pantalla con peaje: cada tanto aparece un ejercicio para seguir viendo.</p>
+        <ul>
+          <li>Funciona sobre YouTube, TikTok, juegos y las apps que elijas</li>
+          <li>Ejercicios según la edad: letras, números, emociones</li>
+          <li>Panel de padres protegido con PIN</li>
+        </ul>
+        <div class="acciones">
+          <a class="btn dark small" href="https://github.com/AbelG88/tolltube/releases/latest" target="_blank" rel="noopener">Descargar APK</a>
+        </div>
+      </article>
+    </div>
+
+    <p class="nota"><strong>Cómo instalar una app web:</strong> abrila en Chrome (Android) o Safari (iPhone), tocá el menú del navegador y elegí "Agregar a la pantalla de inicio". <strong>Tranquera</strong> no está en Play Store todavía: al bajar el APK, Android te va a pedir permiso para instalar apps de origen desconocido.</p>
+  </div>
+</section>
+
+<section id="pronto" style="padding-top:0">
+  <div class="wrap">
+    <p class="eyebrow">En construcción</p>
+    <h2>Próximamente</h2>
+    <div class="grid">
+      <article class="app pronto">
+        <div class="head">
+          <div class="planet p-violet" aria-hidden="true">💬</div>
+          <div><h3>App de comunicación</h3><p class="kind">Comunicación aumentativa</p></div>
+        </div>
+        <p class="desc">Tarjetas con pictogramas y voz para que los chicos que hablan poco o nada puedan pedir, elegir y contar lo que les pasa.</p>
+        <div class="acciones"><span class="tag">Próximamente</span></div>
+      </article>
+      <article class="app pronto">
+        <div class="head">
+          <div class="planet p-violet" aria-hidden="true">🗓️</div>
+          <div><h3>Gurises</h3><p class="kind">Organización familiar</p></div>
+        </div>
+        <p class="desc">Calendario de cuidados, pendientes y documentación de cada hijo en un solo lugar, compartido entre los adultos que lo cuidan.</p>
+        <div class="acciones"><span class="tag">Próximamente</span></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="profesionales" class="pro">
+  <div class="wrap">
+    <p class="eyebrow">Para profesionales</p>
+    <h2>Para quienes atienden a nuestros hijos</h2>
+    <p class="lead">Una herramienta pensada para terapeutas y profesionales que trabajan por su cuenta.</p>
+    <div class="grid">
+      <article class="app">
+        <div class="head">
+          <div class="planet p-gris" aria-hidden="true">📒</div>
+          <div><h3>Consultorio</h3><p class="kind">App web · Android y iPhone</p></div>
+        </div>
+        <p class="desc">Turnos, cobros y deudas del consultorio desde el celular, sin internet y sin cuentas.</p>
+        <ul>
+          <li>Semana a la vista y turnos que se repiten solos</li>
+          <li>Control de pagos, obras sociales y deudas</li>
+          <li>Recordatorios y avisos por WhatsApp</li>
+        </ul>
+        <div class="acciones">
+          <a class="btn dark small" href="https://abelg88.github.io/PsicoApp/" target="_blank" rel="noopener">Abrir Consultorio</a>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="novedades">
+  <div class="wrap">
+    <p class="eyebrow">Novedades</p>
+    <h2>Autismo, pero posta</h2>
+    <p class="lead">Lo último que publican fuentes científicas y organizaciones serias. Sin curas milagrosas ni titulares para asustar. Se actualiza solo.</p>
+    <ul class="news-list" id="news" aria-live="polite">
+      <li id="news-estado">Cargando novedades…</li>
+    </ul>
+    <p class="fuentes">Fuentes:
+      <a href="https://europepmc.org/" target="_blank" rel="noopener">Europe PMC</a> (revisiones sistemáticas) ·
+      <a href="https://www.thetransmitter.org/" target="_blank" rel="noopener">The Transmitter</a> ·
+      <a href="https://www.sciencedaily.com/news/mind_brain/autism/" target="_blank" rel="noopener">ScienceDaily</a> ·
+      <a href="https://autismo.org.es/" target="_blank" rel="noopener">Autismo España</a>.
+      Algunos títulos están en inglés. Una noticia no es una indicación médica: cualquier cambio en un tratamiento se habla con el equipo que atiende a tu hijo.</p>
+  </div>
+</section>
+
+<section id="sobre" class="sobre">
+  <div class="wrap">
+    <p class="eyebrow">Sobre mí</p>
+    <h2>Por qué existe esta página</h2>
+    <div class="texto">
+      <p>Soy Abel, papá de un nene con autismo, y trabajo en tecnología.</p>
+      <p>Cuando llegó el diagnóstico me encontré con que casi todo lo que necesitaba organizar en casa (las comidas, los pañales, las pantallas, quién lo cuida cada día) lo terminaba resolviendo con papelitos, planillas o apps que no estaban pensadas para nosotros. Así que empecé a armar las mías.</p>
+      <p>Las hice para mi familia. Las publico porque es muy probable que a otra mamá o a otro papá le esté pasando lo mismo, y si a alguien más le sirven, mejor.</p>
+      <p>No son productos terminados ni pretenden serlo: son herramientas caseras que voy mejorando con el uso, y con lo que me cuentan quienes las prueban.</p>
+      <p class="firma">Abel</p>
+    </div>
+  </div>
+</section>
+
+<section id="aportes" class="aportes">
+  <div class="wrap">
+    <p class="eyebrow">Aportes</p>
+    <h2>Si te sirvió y querés dar una mano</h2>
+    <p class="lead">Todo es gratis y va a seguir siéndolo. Un aporte, del monto que sea, me ayuda a dedicarle tiempo a mejorar las apps y a hacer las que faltan. Es totalmente opcional.</p>
+    <div class="caja">
+      <div>
+        <h3>Desde Argentina</h3>
+        <div class="fila">
+          <a class="btn line" href="https://link.mercadopago.com.ar/abelg88" target="_blank" rel="noopener">Mercado Pago</a>
+          <a class="btn line" href="https://cafecito.app/abelg88" target="_blank" rel="noopener">Cafecito</a>
+        </div>
+      </div>
+      <div>
+        <h3>Desde el exterior</h3>
+        <div class="fila">
+          <a class="btn line" href="https://paypal.me/AbelG88" target="_blank" rel="noopener">PayPal</a>
+          <a class="btn line" href="https://buymeacoffee.com/abelg88" target="_blank" rel="noopener">Buy Me a Coffee</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p><strong>Órbita TEA</strong> es un proyecto personal, sin fines de lucro y sin relación con ninguna institución.</p>
+    <p>Las apps se ofrecen tal cual están, sin garantías. No reemplazan el criterio de los profesionales que acompañan a tu hijo.</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var lista=document.getElementById('news');
+  function fecha(s){
+    var d=new Date(s);
+    if(isNaN(d)) return '';
+    return d.toLocaleDateString('es-AR',{day:'numeric',month:'short',year:'numeric'});
+  }
+  function pintar(items){
+    lista.textContent='';
+    items.slice(0,10).forEach(function(n){
+      if(!n||!n.titulo||!/^https:\/\//.test(n.url||'')) return;
+      var li=document.createElement('li'), a=document.createElement('a'), m=document.createElement('div'), b=document.createElement('b');
+      a.href=n.url; a.target='_blank'; a.rel='noopener'; a.textContent=n.titulo;
+      m.className='news-meta'; b.textContent=n.fuente||'';
+      m.appendChild(b);
+      var f=fecha(n.fecha); if(f){var s=document.createElement('span'); s.textContent=f; m.appendChild(s);}
+      li.appendChild(a); li.appendChild(m); lista.appendChild(li);
+    });
+    if(!lista.children.length) fallo();
+  }
+  function fallo(){
+    lista.textContent='';
+    var li=document.createElement('li');
+    li.textContent='No se pudieron cargar las novedades en este momento. Podés entrar directo a las fuentes que figuran acá abajo.';
+    lista.appendChild(li);
+  }
+  fetch('/api/novedades').then(function(r){
+    if(!r.ok) throw new Error(r.status);
+    return r.json();
+  }).then(function(d){pintar(d.items||[]);}).catch(fallo);
+})();
+</script>
+</body>
+</html>
