@@ -100,6 +100,21 @@ nav.menu a:hover{background:var(--line);color:var(--ink)}
 .fuentes{margin-top:22px;font-size:.92rem;color:var(--ink-2)}
 .fuentes a{white-space:nowrap}
 
+
+/* ---------- opiniones ---------- */
+.opina form{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:24px;margin-top:26px;display:grid;gap:16px;max-width:640px}
+.opina label{font-weight:700;font-size:.95rem;display:grid;gap:6px}
+.opina label small{font-weight:400;color:var(--ink-2)}
+.opina select,.opina textarea,.opina input[type=text]{font:inherit;color:var(--ink);background:#fff;border:2px solid var(--line);border-radius:12px;padding:12px;width:100%;min-height:48px}
+.opina textarea{min-height:130px;resize:vertical}
+.opina select:focus,.opina textarea:focus,.opina input:focus{outline:3px solid var(--sun);border-color:var(--ink)}
+.opina .trampa{position:absolute;left:-9999px;height:0;overflow:hidden}
+.opina .tipos{display:flex;flex-wrap:wrap;gap:8px}
+.opina .tipos label{display:inline-flex;grid-template-columns:none;align-items:center;gap:8px;font-weight:600;background:#fff;border:2px solid var(--line);border-radius:12px;padding:10px 14px;min-height:48px;cursor:pointer}
+.opina .tipos input{accent-color:var(--teal);width:18px;height:18px}
+.opina .estado{font-weight:700;min-height:1.4em}
+.opina .estado.ok{color:var(--teal)} .opina .estado.mal{color:var(--coral)}
+
 /* ---------- sobre mí y aportes ---------- */
 .sobre{background:var(--ink);color:#fff}
 .sobre .eyebrow{color:var(--sun)}
@@ -126,6 +141,7 @@ footer p+p{margin-top:8px}
       <a href="#pronto">Próximamente</a>
       <a href="#profesionales">Profesionales</a>
       <a href="#novedades">Novedades</a>
+      <a href="#opina">Tu opinión</a>
       <a href="#sobre">Sobre mí</a>
       <a href="#aportes">Aportes</a>
     </nav>
@@ -306,6 +322,43 @@ footer p+p{margin-top:8px}
   </div>
 </section>
 
+<section id="opina" class="opina">
+  <div class="wrap">
+    <p class="eyebrow">Tu opinión</p>
+    <h2>Contame qué mejorarías</h2>
+    <p class="lead">Las apps mejoran con lo que me cuentan quienes las usan. Las críticas son bienvenidas, las leo todas. No hace falta cuenta ni dejar tus datos.</p>
+    <form id="form-op" novalidate>
+      <label for="op-app">¿Sobre qué app?
+        <select id="op-app" name="app">
+          <option value="mangiamo">Mangiamo</option>
+          <option value="nappy">Nappy</option>
+          <option value="tranquera">Tranquera</option>
+          <option value="consultorio">Consultorio (para profesionales)</option>
+          <option value="comunicacion">App de comunicación (próxima)</option>
+          <option value="sitio">Este sitio</option>
+        </select>
+      </label>
+      <fieldset style="border:0;padding:0;margin:0">
+        <legend style="font-weight:700;font-size:.95rem;margin-bottom:6px">¿Qué querés contarme?</legend>
+        <div class="tipos">
+          <label><input type="radio" name="tipo" value="sugerencia" checked> Una idea o mejora</label>
+          <label><input type="radio" name="tipo" value="critica"> Una crítica</label>
+          <label><input type="radio" name="tipo" value="problema"> Algo no me funcionó</label>
+        </div>
+      </fieldset>
+      <label for="op-msg">Tu mensaje
+        <textarea id="op-msg" name="mensaje" maxlength="2000" required placeholder="Contame con tus palabras. Si algo no funcionó, qué estabas haciendo y qué celular usás ayuda mucho."></textarea>
+      </label>
+      <label for="op-contacto">Si querés que te responda, dejame cómo contactarte <small>(opcional)</small>
+        <input type="text" id="op-contacto" name="contacto" maxlength="120" autocomplete="off" placeholder="Mail o WhatsApp">
+      </label>
+      <div class="trampa" aria-hidden="true"><label>No completar <input type="text" name="web" tabindex="-1" autocomplete="off"></label></div>
+      <div><button class="btn dark" type="submit" id="op-enviar">Enviar</button></div>
+      <p class="estado" id="op-estado" role="status" aria-live="polite"></p>
+    </form>
+  </div>
+</section>
+
 <section id="sobre" class="sobre">
   <div class="wrap">
     <p class="eyebrow">Sobre mí</p>
@@ -384,6 +437,27 @@ footer p+p{margin-top:8px}
     if(!r.ok) throw new Error(r.status);
     return r.json();
   }).then(function(d){pintar(d.items||[]);}).catch(fallo);
+})();
+
+(function(){
+  var f=document.getElementById('form-op'); if(!f) return;
+  var est=document.getElementById('op-estado'), btn=document.getElementById('op-enviar');
+  var msg={corto:'Escribí un poco más así puedo entenderte.',largo:'El mensaje es muy largo (máximo 2000 caracteres).',limite:'Enviaste varios mensajes seguidos. Probá de nuevo en un rato.'};
+  f.addEventListener('submit',function(e){
+    e.preventDefault();
+    var d=new FormData(f);
+    var body={app:d.get('app'),tipo:d.get('tipo'),mensaje:(d.get('mensaje')||'').trim(),contacto:(d.get('contacto')||'').trim(),web:d.get('web')||''};
+    if(body.mensaje.length<5){est.className='estado mal';est.textContent=msg.corto;return;}
+    btn.disabled=true;est.className='estado';est.textContent='Enviando…';
+    fetch('/api/sugerencias',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+      .then(function(r){return r.json().then(function(j){return {ok:r.ok&&j.ok,j:j};});})
+      .then(function(x){
+        if(x.ok){est.className='estado ok';est.textContent='¡Gracias! Tu mensaje llegó.';f.reset();}
+        else{est.className='estado mal';est.textContent=msg[x.j.error]||'No pude enviarlo ahora. Probá de nuevo más tarde.';}
+      })
+      .catch(function(){est.className='estado mal';est.textContent='No pude enviarlo ahora. Probá de nuevo más tarde.';})
+      .then(function(){btn.disabled=false;});
+  });
 })();
 </script>
 </body>
