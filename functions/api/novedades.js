@@ -6,8 +6,10 @@
 
 const FEEDS = [
   { fuente: 'The Transmitter', url: 'https://www.thetransmitter.org/feed/', lang: 'en', filtro: /autis/i },
-  { fuente: 'ScienceDaily', url: 'https://www.sciencedaily.com/rss/mind_brain/autism.xml', lang: 'en' },
+  { fuente: 'ScienceDaily', url: 'https://www.sciencedaily.com/rss/mind_brain/autism.xml', lang: 'en', filtro: /autis/i },
   { fuente: 'Autismo España', url: 'https://autismo.org.es/feed/', lang: 'es' },
+  { fuente: 'News-Medical', url: 'https://www.news-medical.net/tag/feed/Autism.aspx', lang: 'en' },
+  { fuente: 'Autism Research (revista)', url: 'https://onlinelibrary.wiley.com/feed/19393806/most-recent', lang: 'en' },
 ];
 
 // Revisiones sistemáticas recientes con "autism" en el título (trae el resumen).
@@ -15,7 +17,13 @@ const EUROPE_PMC =
   'https://www.ebi.ac.uk/europepmc/webservices/rest/search?format=json&pageSize=6&resultType=core&query=' +
   encodeURIComponent('(TITLE:autism OR TITLE:autistic) AND PUB_TYPE:"systematic review" sort_date:y');
 
+// Estudios originales recientes de acceso abierto (ensayos y trabajos con resumen).
+const EUROPE_PMC_ESTUDIOS =
+  'https://www.ebi.ac.uk/europepmc/webservices/rest/search?format=json&pageSize=8&resultType=core&query=' +
+  encodeURIComponent('(TITLE:autism OR TITLE:autistic) AND OPEN_ACCESS:y AND HAS_ABSTRACT:y AND (PUB_TYPE:"randomized controlled trial" OR PUB_TYPE:"clinical trial" OR PUB_TYPE:"journal article") sort_date:y');
+
 const POR_FUENTE = 5;
+const MAX_POR_FUENTE = 3; // para que una sola fuente no ocupe todo el carrusel
 const TOTAL = 12;
 const CACHE_SEG = 3 * 60 * 60;
 const COPETE_MAX = 220;
@@ -76,8 +84,8 @@ async function leerRSS(feed) {
   return items;
 }
 
-async function leerEuropePMC() {
-  const r = await fetch(EUROPE_PMC, { cf: { cacheTtl: CACHE_SEG, cacheEverything: true } });
+async function leerEuropePMC(url = EUROPE_PMC, etiqueta = 'Revisión sistemática') {
+  const r = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 (compatible; OrbitaTEA/1.0)', Accept: 'application/json' }, cf: { cacheTtl: CACHE_SEG, cacheEverything: true } });
   if (!r.ok) throw new Error('Europe PMC ' + r.status);
   const d = await r.json();
   const lista = (d.resultList && d.resultList.result) || [];
@@ -89,7 +97,7 @@ async function leerEuropePMC() {
       copete: copete(x.abstractText || ''),
       url: 'https://europepmc.org/article/' + x.source + '/' + x.id,
       fecha: fechaISO(x.firstPublicationDate || (x.pubYear ? x.pubYear + '-01-01' : '')),
-      fuente: 'Revisión sistemática · ' + (x.journalTitle || 'Europe PMC'),
+      fuente: etiqueta + ' · ' + (x.journalTitle || (x.journalInfo && x.journalInfo.journal && x.journalInfo.journal.title) || 'Europe PMC'),
       lang: 'en',
     }));
 }
@@ -119,15 +127,22 @@ async function traducir(texto, env) {
 }
 
 async function armar(env) {
-  const res = await Promise.allSettled([leerEuropePMC(), ...FEEDS.map(leerRSS)]);
+  const res = await Promise.allSettled([leerEuropePMC(), leerEuropePMC(EUROPE_PMC_ESTUDIOS, 'Estudio'), ...FEEDS.map(leerRSS)]);
   let items = [];
   const errores = [];
   for (const r of res) {
     if (r.status === 'fulfilled') items.push(...r.value);
     else errores.push(String(r.reason && r.reason.message ? r.reason.message : r.reason));
   }
+  const ahora = new Date().toISOString();
+  items = items.filter((it) => !it.fecha || it.fecha <= ahora); // descarta fechas futuras (publicación electrónica anticipada)
   items.sort((a, b) => (a.fecha < b.fecha ? 1 : -1));
-  items = items.slice(0, TOTAL);
+  const cuenta = {};
+  items = items.filter((it) => {
+    const k = it.fuente.split(' · ')[0];
+    cuenta[k] = (cuenta[k] || 0) + 1;
+    return cuenta[k] <= MAX_POR_FUENTE;
+  }).slice(0, TOTAL);
 
   await Promise.all(
     items.map(async (it) => {
