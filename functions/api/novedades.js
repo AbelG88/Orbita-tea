@@ -156,7 +156,7 @@ async function armar(env) {
 }
 
 export async function onRequestGet({ env }) {
-  const CLAVE = 'cache:novedades';
+  const CLAVE = 'cache:novedades:v2';
   let data = null;
   if (env.FEEDBACK) {
     const g = await env.FEEDBACK.get(CLAVE, 'json');
