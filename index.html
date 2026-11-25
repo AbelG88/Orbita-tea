@@ -78,7 +78,7 @@ nav.menu a:hover{background:var(--line);color:var(--ink)}
 @media (min-width:980px){.grid.tres{grid-template-columns:repeat(3,1fr)}}
 .app{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;display:flex;flex-direction:column;gap:12px}
 .app .head{display:flex;align-items:center;gap:14px}
-.planet{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;font-size:1.7rem;flex:none}
+.ico{width:56px;height:56px;border-radius:14px;flex:none;object-fit:cover;box-shadow:0 1px 3px rgba(0,0,0,.18)}
 .p-teal{background:var(--teal-soft)} .p-sun{background:var(--sun-soft)} .p-coral{background:var(--coral-soft)} .p-violet{background:var(--violet-soft)} .p-gris{background:#ebe6da}
 .app .kind{font-size:.8rem;font-weight:700;color:var(--ink-2)}
 .app p.desc{color:var(--ink-2)}
@@ -227,7 +227,7 @@ footer p+p{margin-top:8px}
     <p class="lead">Es la pantalla principal: ahí tenés todo lo que necesitan saber los que cuidan a tu hijo. Y si hace falta otra herramienta, te lleva directo.</p>
     <article class="app" style="max-width:none">
       <div class="head">
-        <div class="planet p-violet" aria-hidden="true">🗓️</div>
+        <img class="ico" src="img/gurises.png" alt="" width="56" height="56" loading="lazy">
         <div><h3>Gurises</h3><p class="kind">App web · Android y iPhone</p></div>
       </div>
       <p class="desc">Un solo lugar con el calendario de cuidados, las terapias y actividades, los pendientes y los documentos importantes de cada hijo. Cada familia activa solo los módulos que necesita, y desde ahí puede saltar a las otras apps.</p>
@@ -254,7 +254,7 @@ footer p+p{margin-top:8px}
     <div class="grid">
       <article class="app">
         <div class="head">
-          <div class="planet p-sun" aria-hidden="true">🍝</div>
+          <img class="ico" src="img/mangiamo.png" alt="" width="56" height="56" loading="lazy">
           <div><h3>Mangiamo</h3><p class="kind">App web · Android y iPhone</p></div>
         </div>
         <p class="desc">Una sola planificación de comidas para toda la familia, incluso cuando el nene con TEA come distinto. Combinás su dieta especial (sin gluten, selectividad alimentaria) con la del resto y armás una semana que sirve para todos.</p>
@@ -271,7 +271,7 @@ footer p+p{margin-top:8px}
 
       <article class="app">
         <div class="head">
-          <div class="planet p-teal" aria-hidden="true">🚽</div>
+          <img class="ico" src="img/nappy.png" alt="" width="56" height="56" loading="lazy">
           <div><h3>Nappy</h3><p class="kind">App web · Android y iPhone</p></div>
         </div>
         <p class="desc">Para registrar los intentos en el dejado de pañales y el uso del baño cuando hay varios cuidadores a la vez y la rutina tiene que sostenerse igual, todos los días y entre todos.</p>
@@ -288,7 +288,7 @@ footer p+p{margin-top:8px}
 
       <article class="app">
         <div class="head">
-          <div class="planet p-coral" aria-hidden="true">🧠</div>
+          <img class="ico" src="img/tranquera.png" alt="" width="56" height="56" loading="lazy">
           <div><h3>Tranquera</h3><p class="kind">App Android · se instala con APK</p></div>
         </div>
         <p class="desc">Para las familias que, a veces, no les queda otra que darles el celular. Hace que ese rato pese menos en la culpa: cada tanto aparece un ejercicio, y mientras mira videos tu hijo practica los objetivos que está trabajando.</p>
@@ -305,7 +305,7 @@ footer p+p{margin-top:8px}
 
       <article class="app">
         <div class="head">
-          <div class="planet p-violet" aria-hidden="true">💬</div>
+          <img class="ico" src="img/ecos.png" alt="" width="56" height="56" loading="lazy">
           <div><h3>Ecos</h3><p class="kind">App web · comunicación con tarjetas</p></div>
         </div>
         <p class="desc">Tarjetas con imágenes y voz para que los chicos que hablan poco o nada puedan pedir, elegir y contar lo que les pasa. Armás tus propios módulos con el orden que quieras y rutinas que encadenan tarjetas. Es la primera versión: está en construcción y va a seguir creciendo.</p>
@@ -333,7 +333,7 @@ footer p+p{margin-top:8px}
     <div class="grid">
       <article class="app">
         <div class="head">
-          <div class="planet p-gris" aria-hidden="true">📒</div>
+          <img class="ico" src="img/consultorio.png" alt="" width="56" height="56" loading="lazy">
           <div><h3>Consultorio</h3><p class="kind">App web · Android y iPhone</p></div>
         </div>
         <p class="desc">Turnos, cobros y deudas del consultorio desde el celular, sin internet y sin cuentas.</p>
