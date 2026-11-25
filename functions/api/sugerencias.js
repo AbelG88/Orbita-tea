@@ -2,7 +2,7 @@
 // POST: recibe una sugerencia/crítica de una app y la guarda en Cloudflare KV (binding FEEDBACK).
 // GET ?t=<ADMIN_TOKEN>: lista lo recibido (solo para el dueño del sitio).
 
-const APPS = ['mangiamo', 'nappy', 'tranquera', 'consultorio', 'comunicacion', 'sitio'];
+const APPS = ['gurises', 'mangiamo', 'nappy', 'tranquera', 'consultorio', 'comunicacion', 'sitio'];
 const TIPOS = ['sugerencia', 'critica', 'problema'];
 const MAX_MSG = 2000;
 const MAX_CONTACTO = 120;
